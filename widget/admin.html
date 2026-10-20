@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="mk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agent admin</title>
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        background: #0b1020;
+        color: #e8f1ff;
+      }
+      main { max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; }
+      h1 { font-size: 28px; font-weight: 560; margin: 0 0 8px; }
+      p { color: #9fb4d4; }
+      form, section {
+        border: 1px solid rgba(148, 197, 255, 0.2);
+        border-radius: 16px;
+        padding: 16px;
+        margin: 16px 0;
+      }
+      label { display: block; font-size: 13px; margin: 10px 0 4px; color: #b7c8e4; }
+      input, textarea {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 197, 255, 0.28);
+        background: #101828;
+        color: #e8f1ff;
+        padding: 10px 12px;
+        font: inherit;
+      }
+      button {
+        margin-top: 12px;
+        border: 0;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 700;
+        background: #38bdf8;
+        color: #041018;
+        cursor: pointer;
+      }
+      pre {
+        white-space: pre-wrap;
+        word-break: break-all;
+        background: #101828;
+        border-radius: 12px;
+        padding: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Agent admin</h1>
+      <p>Create a business, paste its price list, and copy the one line that goes on the site.</p>
+
+      <form id="tenant-form">
+        <h2>New business</h2>
+        <label for="id">Tenant id</label>
+        <input id="id" name="id" required placeholder="salon-sk" />
+        <label for="name">Name</label>
+        <input id="name" name="name" required placeholder="Salon Skopje" />
+        <label for="industry">Industry</label>
+        <input id="industry" name="industry" value="services" />
+        <label for="agent">Agent name</label>
+        <input id="agent" name="agent_name" value="Ana" />
+        <label for="greeting">Greeting</label>
+        <input id="greeting" name="greeting_message" value="Zdravo, kako mozam da pomognam?" />
+        <button type="submit">Create and copy snippet</button>
+      </form>
+
+      <form id="knowledge-form">
+        <h2>Price list or FAQ</h2>
+        <label for="tenant">Tenant id</label>
+        <input id="tenant" name="tenant_id" required placeholder="salon-sk" />
+        <label for="source">Source name</label>
+        <input id="source" name="source" value="cenovnik" />
+        <label for="text">Text</label>
+        <textarea id="text" name="text" rows="6" placeholder="Cistenje lice 1500 den. Rabotno vreme 09-17."></textarea>
+        <label for="url">Or a link</label>
+        <input id="url" name="url" placeholder="https://example.com/cenovnik" />
+        <label for="file">Or a PDF / text file</label>
+        <input id="file" name="file" type="file" accept=".pdf,.txt,text/plain,application/pdf" />
+        <button type="submit">Store facts</button>
+      </form>
+
+      <section>
+        <h2>Snippet</h2>
+        <pre id="snippet">Create a business to see the script tag.</pre>
+        <p id="usage"></p>
+        <p id="bookings"></p>
+      </section>
+    </main>
+    <script>
+      var snippet = document.getElementById("snippet");
+      var usage = document.getElementById("usage");
+      var bookings = document.getElementById("bookings");
+
+      function show(body) {
+        snippet.textContent = body.snippet || JSON.stringify(body, null, 2);
+        if (body.usage) {
+          usage.textContent = "Plan " + body.usage.plan + ": " + body.usage.used + "/" + body.usage.limit + " messages this month. Setup " + body.usage.setup_fee_eur + " EUR, monthly " + body.usage.monthly_fee_eur + " EUR.";
+        }
+        if (body.bookings) {
+          bookings.textContent = body.bookings.length ? body.bookings.map(function (row) { return row.when_text + " — " + row.detail; }).join("\n") : "No bookings yet.";
+        }
+      }
+
+      document.getElementById("tenant-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+        var data = Object.fromEntries(new FormData(event.target).entries());
+        fetch("/api/v1/admin/tenants", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }).then(function (response) { return response.json(); }).then(function (body) {
+          show(body);
+          document.getElementById("tenant").value = data.id;
+        });
+      });
+
+      document.getElementById("knowledge-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+        var form = event.target;
+        var file = document.getElementById("file").files[0];
+        var request;
+        if (file) {
+          var upload = new FormData();
+          upload.append("tenant_id", form.tenant_id.value);
+          upload.append("upload", file);
+          request = fetch("/api/v1/admin/knowledge/file", { method: "POST", body: upload });
+        } else {
+          request = fetch("/api/v1/admin/knowledge", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              tenant_id: form.tenant_id.value,
+              source: form.source.value,
+              text: form.text.value,
+              url: form.url.value,
+            }),
+          });
+        }
+        request.then(function (response) { return response.json(); }).then(function (body) {
+          if (body.detail) {
+            snippet.textContent = typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail);
+            return;
+          }
+          return fetch("/api/v1/admin/snippet/" + encodeURIComponent(form.tenant_id.value)).then(function (response) {
+            return response.json();
+          }).then(show);
+        });
+      });
+    </script>
+  </body>
+</html>

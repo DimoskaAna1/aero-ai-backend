@@ -1,0 +1,26 @@
+---
+description: Always-on map of the agent, widget, and data flow
+alwaysApply: true
+---
+
+# Architecture
+
+One FastAPI app serves the web widget, Android sample, and iOS package. Do not duplicate catalog or NLP logic in a client.
+
+```mermaid
+flowchart LR
+  Sdk["widget/sdk.js"] -->|"GET /api/v1/tenant-config/id"| Tenant["app/api/v1/tenant.py"]
+  Sdk -->|"POST /api/v1/chat"| Chat["app/api/v1/chat.py"]
+  Chat --> Flow["app/services/flow.py"]
+  Chat --> Knowledge["app/services/knowledge.py"]
+  Knowledge --> Facts["Supabase tenant_knowledge"]
+  Chat --> Usage["Supabase tenant_usage"]
+  Chat --> Bookings["Supabase tenant_bookings"]
+  Tenant --> Tenants["Supabase tenants"]
+```
+
+- `widget/widget.js` and `widget/sdk.js` stay identical. `/sdk.js` serves `widget/sdk.js`.
+- Chat requires `X-Tenant-Id` and `X-Tenant-Key`. The header must match the body tenant. Keys, usage, and bookings are in Supabase.
+- Menu and price search stay local in `flow.py`. Do not send those turns to OpenAI.
+- `GET /admin` is `widget/admin.html`. Ingest writes `tenant_knowledge` rows for that tenant only.
+- Android is `mobile/android` (`AgentBubble`). iOS is `mobile/ios`. Both call the same API.

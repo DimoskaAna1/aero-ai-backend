@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+data/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.DS_Store
+mobile/android/.gradle/
+mobile/android/.idea/
+mobile/android/build/
+mobile/android/**/build/
+mobile/android/local.properties

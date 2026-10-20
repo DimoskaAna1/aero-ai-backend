@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aero Lounge Chair — Preview</title>
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        color: #e8f1ff;
+        background:
+          radial-gradient(circle at 15% 10%, rgba(56, 189, 248, 0.18), transparent 32%),
+          radial-gradient(circle at 85% 0%, rgba(109, 40, 217, 0.28), transparent 28%),
+          #070b14;
+      }
+      .banner {
+        padding: 10px 20px;
+        background: rgba(8, 12, 24, 0.8);
+        border-bottom: 1px solid rgba(148, 197, 255, 0.16);
+        color: #b7c8e4;
+        font-size: 13px;
+      }
+      main { max-width: 1040px; margin: 0 auto; padding: 32px 20px 140px; }
+      .hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 28px; align-items: center; }
+      .stage {
+        min-height: 420px;
+        border-radius: 28px;
+        border: 1px solid rgba(125, 211, 252, 0.25);
+        box-shadow: 0 0 40px rgba(56, 189, 248, 0.15);
+        background:
+          radial-gradient(circle at 30% 30%, rgba(224, 242, 254, 0.35), transparent 42%),
+          linear-gradient(160deg, #1e293b, #312e81 55%, #0f172a);
+      }
+      .eyebrow { margin: 0 0 8px; letter-spacing: 0.16em; text-transform: uppercase; font-size: 12px; color: #7dd3fc; }
+      h1 { margin: 0 0 8px; font-size: 52px; font-weight: 560; letter-spacing: -0.045em; }
+      .price { font-size: 28px; margin: 0 0 8px; }
+      .installments { color: #9fb4d4; margin: 0 0 20px; }
+      button.cart, a.details {
+        display: inline-block;
+        margin-right: 8px;
+        padding: 12px 16px;
+        border-radius: 999px;
+        text-decoration: none;
+      }
+      button.cart {
+        border: 0;
+        color: #041018;
+        cursor: pointer;
+        background: linear-gradient(180deg, #7dd3fc, #38bdf8);
+      }
+      a.details { border: 1px solid rgba(148, 197, 255, 0.3); color: #e8f1ff; }
+      section { margin-top: 48px; }
+      h2 { font-weight: 560; letter-spacing: -0.03em; }
+      .copy { max-width: 62ch; line-height: 1.65; color: #b7c8e4; }
+      @media (max-width: 800px) {
+        .hero { grid-template-columns: 1fr; }
+        h1 { font-size: 36px; }
+      }
+    </style>
+  </head>
+  <body>
+    <p class="banner">Preview: move the pointer to the top edge for the exit offer. Wait 15 seconds without clicking for the hesitation prompt.</p>
+    <main>
+      <div class="hero">
+        <div class="stage" role="img" aria-label="Aero Lounge Chair"></div>
+        <div>
+          <p class="eyebrow">Oak &amp; Linen</p>
+          <h1>Aero Lounge Chair</h1>
+          <p class="price">$1,280</p>
+          <p class="installments">Or 4 payments of $320. Free delivery this week.</p>
+          <button class="cart" type="button">Add to cart</button>
+          <a class="details" href="#details">Financing</a>
+        </div>
+      </div>
+      <section id="details">
+        <h2>Built to stay in the room</h2>
+        <p class="copy">A low oak frame with a deep linen seat. The chair is made to order and ships in four finishes. Scroll the details, then leave the pointer idle if you want Aero to step in.</p>
+        <p class="copy">The frame is steam-bent white oak with a removable cover. Each chair is numbered, and the linen is a heavy basket weave that softens after the first month.</p>
+        <p class="copy">Financing is available at checkout as four equal payments, or as a longer plan if the order includes a second piece.</p>
+      </section>
+      <section>
+        <h2>What sits well with it</h2>
+        <p class="copy">Pair it with the Aero ottoman, or keep the floor clear. Customers who hesitate on the chair usually ask about the installment plan before they ask about fabric.</p>
+        <p class="copy">Covers unfasten with hidden snaps. If you are comparing two finishes, Aero can hold one chair while the swatches arrive.</p>
+      </section>
+    </main>
+    <script src="http://127.0.0.1:8000/sdk.js" data-tenant="salon-pleasure" data-key="pk_YGz7pSZDE72fheEXwpqbgKB1" defer></script>
+  </body>
+</html>
