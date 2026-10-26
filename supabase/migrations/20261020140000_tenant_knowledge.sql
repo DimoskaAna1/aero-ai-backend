@@ -30,7 +30,7 @@ VALUES (
   'Ananas',
   'ecommerce',
   'Ana | Shopping',
-  'Zdravo, ja sam Ana. Mogu da nađem proizvod, cenu i rate.',
+  'Zdravo, ja sam Ana. Tu sam da ti pomognem da nadjemo savršen proizvod za tebe.',
   '[
     {"label": "Veš mašina", "message": "Veš mašina"},
     {"label": "Na rate", "message": "Plaćanje na rate"},

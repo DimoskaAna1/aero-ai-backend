@@ -62,6 +62,43 @@ app.include_router(api_router, prefix="/api/v1")
 _WIDGET_DIR = Path(__file__).resolve().parents[1] / "widget"
 _SDK_FILE = _WIDGET_DIR / "sdk.js"
 _ADMIN_FILE = _WIDGET_DIR / "admin.html"
+_LAB_FILE = _WIDGET_DIR / "lab.html"
+_MARKET_FILE = _WIDGET_DIR / "market.html"
+_STORES_FILE = _WIDGET_DIR / "stores.html"
+_CLINIC_FILE = _WIDGET_DIR / "clinic.html"
+_HOTEL_FILE = _WIDGET_DIR / "hotel.html"
+_LOOK_FILE = _WIDGET_DIR / "look.html"
+
+
+@app.get("/", include_in_schema=False)
+@app.get("/lab.html", include_in_schema=False)
+def landing() -> FileResponse:
+    return FileResponse(_LAB_FILE, media_type="text/html")
+
+
+@app.get("/market.html", include_in_schema=False)
+def market_page() -> FileResponse:
+    return FileResponse(_MARKET_FILE, media_type="text/html")
+
+
+@app.get("/stores.html", include_in_schema=False)
+def stores_page() -> FileResponse:
+    return FileResponse(_STORES_FILE, media_type="text/html")
+
+
+@app.get("/clinic.html", include_in_schema=False)
+def clinic_page() -> FileResponse:
+    return FileResponse(_CLINIC_FILE, media_type="text/html")
+
+
+@app.get("/hotel.html", include_in_schema=False)
+def hotel_page() -> FileResponse:
+    return FileResponse(_HOTEL_FILE, media_type="text/html")
+
+
+@app.get("/look.html", include_in_schema=False)
+def look_page() -> FileResponse:
+    return FileResponse(_LOOK_FILE, media_type="text/html")
 
 
 @app.get("/sdk.js", include_in_schema=False)
@@ -74,6 +111,7 @@ def embed_sdk() -> FileResponse:
 
 
 @app.get("/admin", include_in_schema=False)
+@app.get("/admin.html", include_in_schema=False)
 def admin_page() -> FileResponse:
     return FileResponse(_ADMIN_FILE, media_type="text/html")
 

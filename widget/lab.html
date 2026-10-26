@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ana — AI agent for customer service</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@450;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --ink: #111114;
+        --muted: #5c5c62;
+        --rule: #dcdcd6;
+        --bg: #f6f6f2;
+        --card: #fff;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; color: var(--ink); background: var(--bg); font-family: Inter, "Helvetica Neue", Arial, sans-serif; }
+      h1, h2, h3, .logo { font-family: Archivo, Inter, sans-serif; }
+      a { color: inherit; text-decoration: none; }
+      button, input { font: inherit; }
+      .wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+      nav {
+        display: flex; align-items: center; gap: 20px;
+        padding: 14px 28px; background: var(--card); border-bottom: 1px solid var(--rule); position: sticky; top: 0; z-index: 10;
+      }
+      .logo { font-weight: 800; letter-spacing: -0.05em; font-size: 22px; }
+      nav .links { display: flex; gap: 18px; flex: 1; font-size: 14px; color: var(--muted); }
+      .ghost, .solid {
+        border-radius: 999px; padding: 9px 14px; font-weight: 650; font-size: 13px; border: 0; cursor: pointer;
+      }
+      .ghost { border: 1px solid var(--rule); background: #fff; }
+      .solid { background: #111114; color: #fff; }
+      .hero { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; align-items: center; padding: 48px 0 28px; }
+      .modes { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+      .modes button { border: 1px solid var(--rule); background: #fff; border-radius: 999px; padding: 6px 10px; font-size: 12px; cursor: pointer; }
+      .modes button.is-on { background: #111114; color: #fff; border-color: #111; }
+      .demo { background: #fff; border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 12px 30px rgba(17,17,20,.1); overflow: hidden; min-height: 540px; }
+      .demo-head { display: flex; gap: 10px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--rule); }
+      .avatar { width: 36px; height: 36px; border-radius: 99px; background: #f3f3f0; display: grid; place-items: center; font-weight: 700; }
+      .demo-head strong { display: block; font-size: 14px; }
+      .demo-head span { font-size: 12px; color: var(--muted); }
+      .demo-thread { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+      .bubble { max-width: 88%; padding: 10px 12px; border-radius: 12px; font-size: 14px; line-height: 1.45; }
+      .bot { background: #f6f6f2; border: 1px solid var(--rule); align-self: flex-start; }
+      .user { background: #111114; color: #fff; align-self: flex-end; }
+      .card { display: grid; grid-template-columns: 88px 1fr; gap: 10px; margin-top: 8px; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: #fff; }
+      .card img { width: 88px; height: 88px; object-fit: cover; }
+      .card strong { display: block; font-size: 13px; }
+      .card em { font-style: normal; font-size: 12px; color: var(--muted); }
+      .status { font-size: 13px; color: var(--muted); }
+      .eyebrow { margin: 0 0 12px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+      h1 { margin: 0 0 16px; font-size: 56px; line-height: .95; letter-spacing: -.045em; font-weight: 650; }
+      h2 { font-size: 36px; letter-spacing: -.04em; font-weight: 650; }
+      h3 { margin: 8px 0; }
+      .lead { margin: 0 0 22px; font-size: 18px; line-height: 1.5; color: var(--muted); max-width: 40ch; }
+      form.cta { display: flex; gap: 8px; }
+      form.cta input { flex: 1; border: 1px solid var(--rule); border-radius: 999px; padding: 12px 14px; }
+      .fine { margin: 12px 0 0; font-size: 13px; color: var(--muted); }
+      .strip { display: grid; grid-template-columns: 1.2fr .8fr; gap: 28px; padding: 12px 0 28px; }
+      .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      .kpis article, .panel { background: #fff; border: 1px solid var(--rule); border-radius: 12px; padding: 16px; }
+      .kpis strong { display: block; font-size: 36px; letter-spacing: -.04em; }
+      .kpis span { display: block; margin-top: 8px; font-size: 12px; letter-spacing: .08em; color: var(--muted); }
+      .channels { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+      .channels b { border: 1px solid var(--rule); border-radius: 999px; padding: 6px 10px; font-size: 12px; background: #fff; }
+      .marquee { overflow: hidden; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); background: #fff; }
+      .marquee p { margin: 8px 28px 0; font-size: 11px; letter-spacing: .12em; color: var(--muted); }
+      .track { display: flex; gap: 36px; padding: 14px 0 18px; width: max-content; animation: slide 28s linear infinite; }
+      .track span { font-weight: 700; letter-spacing: -.02em; }
+      @keyframes slide { to { transform: translateX(-50%); } }
+      section.block { padding: 56px 0; }
+      .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+      .steps article, .six article, .three article, .price, .faq details, .comp article { background: #fff; border: 1px solid var(--rule); border-radius: 12px; padding: 16px; }
+      .steps span, .label { color: var(--muted); font-size: 12px; letter-spacing: .08em; }
+      .six { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      .mail { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+      .inbox { background: #fff; border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
+      .inbox header { padding: 12px 14px; border-bottom: 1px solid var(--rule); font-size: 13px; color: var(--muted); }
+      .inbox p { margin: 0; padding: 14px; line-height: 1.5; }
+      .suggest { margin: 0 14px 14px; padding: 12px; background: #f6f6f2; border-radius: 8px; font-size: 14px; }
+      .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+      .logos { display: flex; flex-wrap: wrap; gap: 8px; }
+      .logos span { border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; background: #fff; font-size: 13px; }
+      .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .split article { overflow: hidden; padding: 0; }
+      .split img { width: 100%; height: 180px; object-fit: cover; display: block; }
+      .split .copy { padding: 18px; }
+      .quote { font-size: 18px; line-height: 1.45; }
+      .prices { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+      .price.hot { outline: 2px solid #111114; }
+      .price .num { font-size: 40px; letter-spacing: -.04em; font-weight: 700; }
+      .price ul { padding-left: 18px; color: var(--muted); font-size: 14px; }
+      .toggle { display: flex; gap: 8px; margin: 12px 0 20px; }
+      .toggle .is-on { background: #111114; color: #fff; border-color: #111; }
+      .faq details { margin-bottom: 8px; }
+      .faq summary { cursor: pointer; font-weight: 650; }
+      .comp { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      .cta-band { text-align: center; padding: 48px 0; }
+      footer { border-top: 1px solid var(--rule); background: #fff; padding: 36px 0 24px; }
+      .cols { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; font-size: 14px; color: var(--muted); }
+      .cols strong { display: block; color: var(--ink); margin-bottom: 8px; }
+      .cols a { display: block; padding: 3px 0; }
+      .legal { margin-top: 24px; font-size: 12px; color: var(--muted); }
+      @media (max-width: 980px) {
+        .hero, .strip, .six, .mail, .three, .split, .prices, .cols, .steps { grid-template-columns: 1fr; }
+        nav .links { display: none; }
+        h1 { font-size: 40px; }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a class="logo" href="/">Ana</a>
+      <div class="links">
+        <a href="stores.html">For online stores</a>
+        <a href="#hotels">For hotels</a>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">Resources</a>
+      </div>
+      <span>EN</span>
+      <a class="ghost" href="admin.html">Sign in</a>
+      <a class="solid" href="admin.html">Sign up</a>
+    </nav>
+
+    <div class="wrap">
+      <section class="hero">
+        <div>
+          <div class="modes">
+            <button type="button" class="is-on" data-demo="shop">Customer shopping online</button>
+            <button type="button" data-demo="hotel">Guests at a seaside hotel</button>
+            <button type="button" data-demo="cs">Customer service team at work</button>
+          </div>
+          <div class="demo">
+            <div class="demo-head">
+              <div class="avatar">A</div>
+              <div><strong id="demo-name">Nord Market</strong><span id="demo-role">AI support assistant</span></div>
+            </div>
+            <div class="demo-thread" id="demo-thread"></div>
+          </div>
+        </div>
+        <div>
+          <p class="eyebrow">AI agent for customer service · chat, catalog, cart, knowledge</p>
+          <h1>Customers get answers now.<br />Your team gets its time back.</h1>
+          <p class="lead">The agent learns from your facts and files, answers from the catalog without spending model tokens on menu search, and can put a product in the cart from the chat. One script tag. No code on the storefront.</p>
+          <form class="cta" action="admin.html" method="get">
+            <input type="email" name="email" placeholder="Work email" required />
+            <button class="solid" type="submit">Start for free</button>
+          </form>
+          <p class="fine">No credit card · tenant key per shop · widget live after ingest</p>
+        </div>
+      </section>
+
+      <section class="strip">
+        <div>
+          <p class="eyebrow">Channels</p>
+          <div class="channels">
+            <b>Chatbot</b><b>Web widget</b><b>Android</b><b>iOS</b><b>Cart event</b><b>Admin ingest</b>
+          </div>
+          <p class="eyebrow" style="margin-top:18px">AI models</p>
+          <div class="channels"><b>ChatGPT</b><b>when the turn leaves the local catalog</b></div>
+        </div>
+        <div class="kpis">
+          <article><strong>Local</strong><p>Menu and price search stay in flow.py</p><span>No tokens for those turns</span></article>
+          <article><strong>1</strong><p>script for web and mobile</p><span>Same X-Tenant-Id API</span></article>
+          <article><strong>Cart</strong><p>U kosnicka from a product card</p><span>b2b-ai:cart event</span></article>
+        </div>
+      </section>
+    </div>
+
+    <div class="marquee">
+      <p>USED ON OUR DEMO TENANTS</p>
+      <div class="track">
+        <span>Nord Market</span><span>Ananas catalog</span><span>Health Clinic</span><span>Demo Tenant</span><span>Salon ingest</span><span>Android bubble</span>
+        <span>Nord Market</span><span>Ananas catalog</span><span>Health Clinic</span><span>Demo Tenant</span><span>Salon ingest</span><span>Android bubble</span>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <section class="block" id="how">
+        <p class="eyebrow">From nothing to live</p>
+        <h2>How it works in five steps, without a developer.</h2>
+        <div class="steps">
+          <article><span>01</span><h3>Import your data</h3><p>Admin ingest for URL, PDF or text. Rows write to tenant_knowledge for that tenant only.</p></article>
+          <article><span>02</span><h3>Customize chatbot</h3><p>Greeting, chips, agent name and theme color come from tenant config.</p></article>
+          <article><span>03</span><h3>Deploy it instantly</h3><p>One script: data-tenant and data-key. /sdk.js is widget/sdk.js.</p></article>
+          <article><span>04</span><h3>Connect with your tools</h3><p>Listen for b2b-ai:cart or set data-cart-url. Bookings save in Supabase.</p></article>
+          <article><span>05</span><h3>Connect with your team</h3><p>Usage is metered per tenant. Admin copies the snippet.</p></article>
+        </div>
+      </section>
+
+      <section class="block" id="features">
+        <p class="eyebrow">What the agent can do</p>
+        <h2>Six things that decide whether a customer gets helped or gives up.</h2>
+        <p class="lead">In the middle: Nord Market taking a phone order, played back as the same widget your shop gets.</p>
+        <div class="six">
+          <article><h3>Knowledge from your files</h3><p>Add a URL, PDF or paste. Search is filtered by tenant_id. The agent does not quote another shop’s catalog.</p></article>
+          <article><h3>Actions in the conversation</h3><p>Show a product card, add to cart, check sale price, or save a clinic booking.</p></article>
+          <article><h3>Guided catalog flow</h3><p>Categories, sale, rate and nazad stay in the backend flow. No improvising on prices.</p></article>
+          <article><h3>One knowledge, three clients</h3><p>Web script, Android AgentBubble and iOS package hit the same API.</p></article>
+          <article><h3>Handover with context</h3><p>Session stays in memory for the chat. Host pages keep the cart.</p></article>
+          <article><h3>Gaps you can see</h3><p>If the catalog has no match, the agent says so and offers categories instead of inventing a SKU.</p></article>
+        </div>
+      </section>
+
+      <section class="block mail">
+        <div class="inbox">
+          <header>Re: Product inquiry · customer@example.com</header>
+          <p>Hi, I am interested in a phone under 15.000 MKD. Is Redmi 13 still on sale?</p>
+          <div class="suggest"><strong>Suggested from tenant facts</strong><br />Xiaomi Redmi 13 128GB is 12.990 MKD, was 14.990. On sale. I can put it in the cart from the widget.</div>
+        </div>
+        <div>
+          <p class="eyebrow">Same knowledge, another surface</p>
+          <h2>Answers stay on your facts.</h2>
+          <p class="lead">Chat and admin ingest share tenant_knowledge. Menu turns never leave the local catalog. Other turns can use the model only after retrieval.</p>
+          <ul>
+            <li>Catalog NLP stays in flow.py</li>
+            <li>RAG is scoped with .eq("tenant_id")</li>
+            <li>Keys and usage live in Supabase</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="block">
+        <p class="eyebrow">Live, not a screenshot</p>
+        <h2>This is the agent talking. The same widget your customers get.</h2>
+        <div class="three">
+          <article>
+            <p class="label">In an online store</p>
+            <h3>Advises and sells</h3>
+            <p>Finds the model from a budget sentence, shows a product card, adds to cart.</p>
+            <p class="label">Recorded demo · Nord Market</p>
+            <a class="ghost" href="market.html">See the shop demo</a>
+          </article>
+          <article>
+            <p class="label">In a clinic</p>
+            <h3>Answers and books</h3>
+            <p>Health-clinic tenant can take a booking from the chat into tenant_bookings.</p>
+            <p class="label">Demo tenant · health-clinic</p>
+            <a class="ghost" href="admin.html">Open admin</a>
+          </article>
+          <article>
+            <p class="label">In customer service</p>
+            <h3>Solves from facts</h3>
+            <p>If the fact is missing, it says so. It does not invent a price.</p>
+            <p class="label">Same widget in the corner</p>
+            <a class="ghost" href="#pricing">See plans</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="block">
+        <p class="eyebrow">Integrations</p>
+        <h2>Works with the page you already run.</h2>
+        <p class="lead">The shop keeps its own cart. Ana posts a cart event. No Shopify clone required.</p>
+        <div class="logos">
+          <span>Script tag</span><span>Custom event</span><span>data-cart-url</span><span>Supabase</span><span>Android</span><span>iOS</span><span>FastAPI</span>
+        </div>
+      </section>
+
+      <section class="block split" id="stores">
+        <article class="panel">
+          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=900&q=80" alt="Product cards inside a shop chat" />
+          <div class="copy">
+            <p class="label">For online stores</p>
+            <h2>Running a shop?</h2>
+            <p>The agent understands a described need, lists models from the catalog, shows product cards and can add the item to the host cart.</p>
+            <a class="solid" href="market.html">Open Nord Market</a>
+          </div>
+        </article>
+        <article class="panel" id="hotels">
+          <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=900&q=80" alt="Room offers inside a stay chat" />
+          <div class="copy">
+            <p class="label">For clinics and stays</p>
+            <h2>Need a booking?</h2>
+            <p>Clinic tenant can save a booking from the chat. Hotel-style copy is a catalog plus facts, not a second product.</p>
+            <a class="ghost" href="admin.html">Create a tenant</a>
+          </div>
+        </article>
+      </section>
+
+      <section class="block" id="customers">
+        <p class="eyebrow">Demos, not invented logos</p>
+        <h2>What you can click today.</h2>
+        <div class="three">
+          <article>
+            <h3>Nord Market</h3>
+            <p class="quote">Tenant ananas. Burger menu, sale prices, U kosnicka from the card.</p>
+            <p>pk_ananas_demo</p>
+          </article>
+          <article>
+            <h3>Health clinic</h3>
+            <p class="quote">Booking turns write tenant_bookings. Same chat endpoint.</p>
+            <p>pk_health_demo</p>
+          </article>
+          <article>
+            <h3>Admin ingest</h3>
+            <p class="quote">Upload facts for one tenant. The snippet is copied from /admin.</p>
+            <p>No shared catalog across tenants</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="block" id="pricing">
+        <p class="eyebrow">Pricing</p>
+        <h2>Pick a plan. Limits are real meter rows.</h2>
+        <p class="lead">Every plan is the same product. What differs is monthly messages in tenant_usage.</p>
+        <div class="toggle">
+          <button class="ghost is-on" type="button" id="bill-month">Monthly</button>
+          <button class="ghost" type="button" id="bill-year">Annual</button>
+        </div>
+        <div class="prices">
+          <article class="price">
+            <h3>Demo</h3>
+            <div class="num">$0</div>
+            <p>No credit card. Seeded tenants on startup.</p>
+            <ul>
+              <li>10,000 messages on demo keys</li>
+              <li>Ananas, clinic, demo-tenant</li>
+              <li>Widget personalization</li>
+              <li>Chat + catalog flow</li>
+            </ul>
+            <a class="ghost" href="market.html">Open demo</a>
+          </article>
+          <article class="price">
+            <h3>Starter</h3>
+            <div class="num">metered</div>
+            <p>Default new tenant: 500 messages / month.</p>
+            <ul>
+              <li>500 chatbot responses / month</li>
+              <li>One tenant, one public key</li>
+              <li>Ingest URL, PDF, text</li>
+              <li>Cart event + bookings</li>
+            </ul>
+            <a class="solid" href="admin.html">Create tenant</a>
+          </article>
+          <article class="price hot">
+            <h3>Grow</h3>
+            <div class="num">custom</div>
+            <p>Raise monthly_message_limit on the tenant row.</p>
+            <ul>
+              <li>Same API, higher cap</li>
+              <li>Knowledge scoped to tenant</li>
+              <li>Android + iOS clients</li>
+              <li>No extra catalog copy</li>
+            </ul>
+            <a class="ghost" href="admin.html">Talk in admin</a>
+          </article>
+          <article class="price">
+            <h3>Scale</h3>
+            <div class="num">custom</div>
+            <p>Own domain, more tenants, billed outside this repo.</p>
+            <ul>
+              <li>Many tenants, one FastAPI</li>
+              <li>PUBLIC_BASE_URL for the script</li>
+              <li>No ChatLab branding here — this is Ana</li>
+            </ul>
+            <a class="ghost" href="admin.html">Sign up</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="block faq" id="faq">
+        <p class="eyebrow">Questions</p>
+        <h2>Frequently asked questions.</h2>
+        <details open><summary>What is Ana?</summary><p>A multi-tenant chat agent. One backend, one embeddable widget, Android and iOS bubbles.</p></details>
+        <details><summary>How does it work?</summary><p>The widget posts to /api/v1/chat with X-Tenant-Id and X-Tenant-Key. Catalog turns stay in flow.py. Other turns retrieve tenant_knowledge.</p></details>
+        <details><summary>How much does it cost?</summary><p>Demo keys are free. New tenants start at 500 messages / month unless you raise the limit in Supabase.</p></details>
+        <details><summary>Do I need to code?</summary><p>Paste the script from /admin. The shop page listens for b2b-ai:cart if you want a cart.</p></details>
+        <details><summary>Which model?</summary><p>Menu and price search do not call OpenAI. Other turns use the configured LiteLLM model when a key is present.</p></details>
+        <details><summary>Can I use my own backend?</summary><p>Yes. The widget is a client. Catalog logic stays on this API so clients do not duplicate it.</p></details>
+        <details><summary>Is data isolated?</summary><p>Knowledge, usage, keys and bookings are filtered by tenant_id. The header must match the body tenant.</p></details>
+      </section>
+
+      <section class="block">
+        <p class="eyebrow">Data and compliance</p>
+        <h2>Tenant rows stay on your tenant.</h2>
+        <div class="comp">
+          <article><h3>Your data stays yours</h3><p>Ingest writes tenant_knowledge for that tenant only. Foreign tenant_id rows are dropped on read.</p></article>
+          <article><h3>Keys on the wire</h3><p>Chat requires matching X-Tenant-Id and X-Tenant-Key. CORS is * with credentials off.</p></article>
+          <article><h3>No invented stock</h3><p>If the catalog has no match, the reply says so. Prices come from the product row.</p></article>
+        </div>
+      </section>
+
+      <section class="cta-band">
+        <h2>Ready to put the agent on a shop?</h2>
+        <p class="lead" style="margin:12px auto">One script tag. Catalog stays on the server. Cart stays on the page.</p>
+        <a class="solid" href="admin.html">Try for free</a>
+        <p class="fine">No credit card required for demo keys</p>
+      </section>
+    </div>
+
+    <footer>
+      <div class="wrap cols">
+        <div>
+          <strong>Product</strong>
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="stores.html">For online stores</a>
+          <a href="#hotels">For hotels</a>
+          <a href="market.html">Shop demo</a>
+        </div>
+        <div>
+          <strong>Integrations</strong>
+          <a href="#features">Script tag</a>
+          <a href="#features">Cart event</a>
+          <a href="#features">Supabase</a>
+          <a href="#features">Android</a>
+          <a href="#features">iOS</a>
+        </div>
+        <div>
+          <strong>Compare</strong>
+          <a href="#features">Ana vs a cloned SaaS page</a>
+          <a href="#faq">What we actually ship</a>
+        </div>
+        <div>
+          <strong>Company</strong>
+          <a href="admin.html">Admin</a>
+          <a href="admin.html">Create tenant</a>
+        </div>
+        <div>
+          <strong>Contact</strong>
+          <p>This is the Ana SDK repo, not ChatLab sp. z o.o.</p>
+        </div>
+      </div>
+      <div class="wrap legal">Ana SDK · © 2026 · Layout inspired by a public marketing page, product is ours.</div>
+    </footer>
+
+    <script>
+      var demos = {
+        shop: {
+          name: "Nord Market",
+          role: "AI support assistant",
+          html:
+            '<div class="bubble bot">Hi, I am Nord Market’s assistant. What are you looking for?</div>' +
+            '<div class="bubble user">A phone for everyday use, under 15.000 MKD</div>' +
+            '<div class="status">Searching the catalogue…</div>' +
+            '<div class="bubble bot">Xiaomi Redmi 13 fits that budget. On sale.' +
+            '<div class="card"><img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=240&q=80" alt="Redmi 13" />' +
+            '<div><strong>Xiaomi Redmi 13</strong><em>128GB · in stock</em><b>12.990 MKD</b></div></div></div>'
+        },
+        hotel: {
+          name: "Health Clinic",
+          role: "AI support assistant",
+          html:
+            '<div class="bubble bot">Good evening. How can I help with your visit?</div>' +
+            '<div class="bubble user">I need a slot tomorrow afternoon.</div>' +
+            '<div class="status">Checking tenant_bookings…</div>' +
+            '<div class="bubble bot">I can hold an afternoon slot. Send a name and we save the booking for this clinic tenant only.</div>'
+        },
+        cs: {
+          name: "Demo Tenant",
+          role: "Customer service",
+          html:
+            '<div class="bubble bot">Hello. What can I help you with?</div>' +
+            '<div class="bubble user">The listed price for Soundbar 2.1?</div>' +
+            '<div class="status">Reading the catalog…</div>' +
+            '<div class="bubble bot">Soundbar 2.1. Cena 8.990 MKD. I can put it in the cart from the widget.</div>'
+        }
+      };
+      var thread = document.getElementById("demo-thread");
+      var nameEl = document.getElementById("demo-name");
+      var roleEl = document.getElementById("demo-role");
+      function showDemo(key) {
+        var d = demos[key];
+        nameEl.textContent = d.name;
+        roleEl.textContent = d.role;
+        thread.innerHTML = d.html;
+      }
+      showDemo("shop");
+      document.querySelectorAll(".modes button").forEach(function (button) {
+        button.addEventListener("click", function () {
+          document.querySelectorAll(".modes button").forEach(function (b) { b.classList.remove("is-on"); });
+          button.classList.add("is-on");
+          showDemo(button.getAttribute("data-demo"));
+        });
+      });
+      var monthBtn = document.getElementById("bill-month");
+      var yearBtn = document.getElementById("bill-year");
+      function setBilling(annual) {
+        monthBtn.classList.toggle("is-on", !annual);
+        yearBtn.classList.toggle("is-on", annual);
+        yearBtn.textContent = annual ? "Annual · 2 months free" : "Annual";
+      }
+      monthBtn.addEventListener("click", function () { setBilling(false); });
+      yearBtn.addEventListener("click", function () { setBilling(true); });
+    </script>
+    <script src="http://127.0.0.1:8000/sdk.js" data-tenant="ananas" data-key="pk_ananas_demo" data-launcher-label="Ask about Ana" data-launcher-sub="We reply right away" defer></script>
+  </body>
+</html>

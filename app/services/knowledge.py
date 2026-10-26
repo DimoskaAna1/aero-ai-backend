@@ -162,14 +162,22 @@ def _from_supabase(tenant_id: str) -> List[Record]:
 
         if not supabase_configured():
             return []
-        response = (
-            get_supabase()
-            .table("tenant_knowledge")
-            .select("tenant_id,kind,title,body,attributes")
-            .eq("tenant_id", tenant_id)
-            .limit(500)
-            .execute()
-        )
+        rows = []
+        start = 0
+        while start < 5000:
+            response = (
+                get_supabase()
+                .table("tenant_knowledge")
+                .select("tenant_id,kind,title,body,attributes")
+                .eq("tenant_id", tenant_id)
+                .range(start, start + 499)
+                .execute()
+            )
+            chunk = getattr(response, "data", None) or []
+            rows.extend(row for row in chunk if isinstance(row, dict))
+            if len(chunk) < 500:
+                break
+            start += 500
     except Exception as exc:
         logger.warning(
             "Knowledge lookup failed tenant=%s error_type=%s",
@@ -177,7 +185,6 @@ def _from_supabase(tenant_id: str) -> List[Record]:
             type(exc).__name__,
         )
         return []
-    rows = getattr(response, "data", None) or []
     records = []
     for row in rows:
         if not isinstance(row, dict):

@@ -8,7 +8,7 @@ import openai
 import tiktoken
 
 from app.config import Settings
-from app.schemas.chat import ChatRequest, ChatResponse, Suggestion, TokenUsage
+from app.schemas.chat import CartItem, ChatRequest, ChatResponse, Suggestion, TokenUsage
 from app.services.cache import (
     CacheLookupError,
     CacheWrite,
@@ -420,6 +420,22 @@ def execute_chat(
     if step is not None:
         remember(tenant_id, payload.session_id, "user", payload.user_message)
         remember(tenant_id, payload.session_id, "assistant", step.text)
+        def _item(offer) -> CartItem:
+            return CartItem(
+                id=offer.id,
+                title=offer.title,
+                price_mkd=offer.price_mkd,
+                image_url=offer.image_url or None,
+                old_price_mkd=getattr(offer, "old_price_mkd", 0) or 0,
+                combo_percent=getattr(offer, "combo_percent", 0) or 0,
+                combo_ids=list(getattr(offer, "combo_ids", ()) or ()),
+                detail=getattr(offer, "detail", "") or "",
+                images=list(getattr(offer, "images", ()) or ()),
+            )
+
+        cart = _item(step.cart) if step.cart else None
+        card = _item(step.card) if step.card else None
+        cards = [_item(offer) for offer in (step.cards or [])]
         return ChatResponse(
             tenant_id=payload.tenant_id,
             session_id=payload.session_id,
@@ -431,6 +447,9 @@ def execute_chat(
                 Suggestion(label=choice.label, message=choice.message) for choice in step.suggestions
             ],
             image_url=step.image_url or None,
+            cart=cart,
+            card=card,
+            cards=cards,
         )
 
     prior_turns = session_history(tenant_id, payload.session_id)

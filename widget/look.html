@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LUNA — New in</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root { --ink: #111; --pink: #ff2f86; --line: #ececec; }
+      * { box-sizing: border-box; }
+      body { margin: 0; color: var(--ink); background: #fff; font-family: Inter, Arial, sans-serif; }
+      a { color: inherit; text-decoration: none; }
+      button { font: inherit; cursor: pointer; }
+      .announce { background: #111; color: #fff; text-align: center; font-size: 12px; letter-spacing: .12em; padding: 8px 12px; text-transform: uppercase; }
+      header { position: sticky; top: 0; z-index: 20; background: #fff; border-bottom: 1px solid var(--line); }
+      .bar { display: flex; align-items: center; gap: 18px; padding: 14px 28px; }
+      .logo { font-family: "Archivo Narrow", sans-serif; font-weight: 700; font-size: 34px; letter-spacing: .18em; }
+      nav.cats { display: flex; gap: 18px; flex: 1; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+      .bag-btn { border: 0; background: #111; color: #fff; border-radius: 999px; padding: 10px 16px; font-weight: 700; }
+      .hero { margin: 0; min-height: 280px; display: grid; place-items: end start; padding: 36px; color: #fff;
+        background: #111 center/cover no-repeat url("https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1600&q=80"); }
+      .hero h1 { margin: 0; font-family: "Archivo Narrow", sans-serif; font-size: 64px; letter-spacing: -.03em; line-height: .9; }
+      main { max-width: 1280px; margin: 0 auto; padding: 28px 20px 120px; }
+      .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+      article { cursor: pointer; }
+      .photo { aspect-ratio: 3/4; background: #f3f3f3 center/cover no-repeat; }
+      article h3 { margin: 8px 0 2px; font-size: 13px; font-weight: 600; }
+      .price { margin: 0; font-size: 13px; font-weight: 700; }
+      .price s { color: #999; font-weight: 500; margin-right: 6px; }
+      .scrim { position: fixed; inset: 0; border: 0; background: rgba(0,0,0,.45); display: none; z-index: 30; }
+      .scrim.is-on { display: block; }
+      .bag { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100vw); background: #fff; z-index: 40;
+        transform: translateX(105%); transition: transform .25s ease; display: flex; flex-direction: column; }
+      .bag.is-open { transform: none; }
+      .bag header { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+      .bag header strong { letter-spacing: .14em; font-size: 13px; }
+      .bag header button { border: 0; background: transparent; font-size: 22px; }
+      .note { margin: 0; padding: 12px 18px; background: #fff4f8; color: #111; font-size: 14px; line-height: 1.45; }
+      .rows { list-style: none; margin: 0; padding: 8px 18px; overflow: auto; flex: 1; }
+      .rows li { display: grid; grid-template-columns: 72px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+      .rows img { width: 72px; height: 96px; object-fit: cover; background: #f3f3f3; }
+      .rows h3 { margin: 0 0 6px; font-size: 14px; }
+      .rows p { margin: 0; font-size: 13px; font-weight: 700; }
+      .rows s { color: #9a9a9a; font-weight: 500; margin-right: 6px; }
+      .foot { padding: 16px 18px 20px; border-top: 1px solid var(--line); }
+      .foot .sum { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 12px; }
+      .checkout { width: 100%; border: 0; background: #111; color: #fff; padding: 14px; letter-spacing: .12em; font-weight: 700; }
+      @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } nav.cats { display: none; } .hero h1 { font-size: 40px; } }
+    </style>
+  </head>
+  <body>
+    <p class="announce">3 pieces in one look · 20% off all of them</p>
+    <header>
+      <div class="bar">
+        <a class="logo" href="look.html">LUNA</a>
+        <nav class="cats">
+          <a href="#new">New in</a>
+          <a href="#dresses">Dresses</a>
+          <a href="#bags">Bags</a>
+          <a href="#shoes">Shoes</a>
+        </nav>
+        <button class="bag-btn" id="open-bag" type="button">Bag 0</button>
+      </div>
+    </header>
+    <section class="hero">
+      <h1>NEW IN<br />TONIGHT</h1>
+    </section>
+    <main>
+      <div class="grid" id="new">
+        <article data-id="dress-black" data-title="Black Satin Dress" data-price="2490" data-image="https://images.unsplash.com/photo-1704775991534-563c1d548f88?auto=format&fit=crop&w=800&q=80">
+          <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1704775991534-563c1d548f88?auto=format&fit=crop&w=800&q=80')"></div>
+          <h3>Black Satin Dress</h3>
+          <p class="price">2.490 MKD</p>
+        </article>
+        <article data-id="bag-black" data-title="Black Shoulder Bag" data-price="1290" data-image="https://images.unsplash.com/photo-1585488433921-f2ce041b2d64?auto=format&fit=crop&w=800&q=80">
+          <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1585488433921-f2ce041b2d64?auto=format&fit=crop&w=800&q=80');background-position:center 78%"></div>
+          <h3>Black Shoulder Bag</h3>
+          <p class="price">1.290 MKD</p>
+        </article>
+        <article data-id="heels-black" data-title="Black Heels" data-price="1890" data-image="https://images.unsplash.com/photo-1564417071269-08e42408c098?auto=format&fit=crop&w=800&q=80">
+          <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1564417071269-08e42408c098?auto=format&fit=crop&w=800&q=80');background-position:center 70%"></div>
+          <h3>Black Heels</h3>
+          <p class="price">1.890 MKD</p>
+        </article>
+        <article data-id="dress-red" data-title="Red Mini Dress" data-price="2790" data-image="https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80">
+          <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80')"></div>
+          <h3>Red Mini Dress</h3>
+          <p class="price">2.790 MKD</p>
+        </article>
+        <article data-id="bag-mini" data-title="Mini Bag" data-price="990" data-image="https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80">
+          <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80')"></div>
+          <h3>Mini Bag</h3>
+          <p class="price">990 MKD</p>
+        </article>
+        <article data-id="heels-nude" data-title="Nude Heels" data-price="1690" data-image="https://images.unsplash.com/photo-1519415943484-9fa1873496d4?auto=format&fit=crop&w=800&q=80">
+          <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1519415943484-9fa1873496d4?auto=format&fit=crop&w=800&q=80')"></div>
+          <h3>Nude Heels</h3>
+          <p class="price">1.690 MKD</p>
+        </article>
+        <article data-id="top-white" data-title="White Tee" data-price="790" data-image="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80">
+          <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80')"></div>
+          <h3>White Tee</h3>
+          <p class="price">790 MKD</p>
+        </article>
+        <article data-id="slip-dress" data-title="Slip Dress" data-price="2190" data-image="https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=800&q=80">
+          <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=800&q=80')"></div>
+          <h3>Slip Dress</h3>
+          <p class="price">2.190 MKD</p>
+        </article>
+      </div>
+    </main>
+    <button class="scrim" id="scrim" type="button" aria-label="Close bag"></button>
+    <aside class="bag" id="bag" aria-label="Bag">
+      <header>
+        <strong>YOUR BAG</strong>
+        <button id="close-bag" type="button" aria-label="Close">×</button>
+      </header>
+      <p class="note" id="note">Dodadeno vo kosnicka. Nastavete so kupovinate na kombinacijata — 3 artikli i imate 20% na site.</p>
+      <ul class="rows" id="rows"></ul>
+      <div class="foot">
+        <div class="sum"><span>Total</span><span id="total">0 MKD</span></div>
+        <button class="checkout" type="button">Checkout</button>
+      </div>
+    </aside>
+    <script>
+      var LOOKS = [
+        ["dress-black", "bag-black", "heels-black"],
+        ["dress-red", "bag-mini", "heels-nude"]
+      ];
+      var items = [];
+      var bag = document.getElementById("bag");
+      var scrim = document.getElementById("scrim");
+      var rows = document.getElementById("rows");
+      var note = document.getElementById("note");
+      var totalEl = document.getElementById("total");
+      var bagBtn = document.getElementById("open-bag");
+
+      function money(amount) {
+        return String(amount).replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " MKD";
+      }
+      function openBag(on) {
+        bag.classList.toggle("is-open", on);
+        scrim.classList.toggle("is-on", on);
+      }
+      function lookFor(id) {
+        var i;
+        for (i = 0; i < LOOKS.length; i += 1) {
+          if (LOOKS[i].indexOf(id) !== -1) return LOOKS[i];
+        }
+        return null;
+      }
+      function render() {
+        rows.textContent = "";
+        items.forEach(function (item) {
+          var look = lookFor(item.id);
+          if (!look) return;
+          var have = items.filter(function (row) { return look.indexOf(row.id) !== -1; }).length;
+          if (have >= 3) {
+            item.base = item.base || item.price_mkd;
+            item.price_mkd = Math.round(item.base * 0.8);
+          }
+        });
+        var total = 0;
+        items.forEach(function (item) {
+          total += item.price_mkd;
+          var li = document.createElement("li");
+          var img = document.createElement("img");
+          img.src = item.image_url || "";
+          img.alt = item.title;
+          var copy = document.createElement("div");
+          var title = document.createElement("h3");
+          title.textContent = item.title;
+          var price = document.createElement("p");
+          if (item.base && item.base > item.price_mkd) {
+            price.innerHTML = "<s>" + money(item.base) + "</s> " + money(item.price_mkd);
+          } else {
+            price.textContent = money(item.price_mkd);
+          }
+          copy.appendChild(title);
+          copy.appendChild(price);
+          li.appendChild(img);
+          li.appendChild(copy);
+          rows.appendChild(li);
+        });
+        totalEl.textContent = money(total);
+        bagBtn.textContent = "Bag " + items.length;
+        var active = null;
+        items.forEach(function (item) {
+          var look = lookFor(item.id);
+          if (look) active = look;
+        });
+        if (!active) {
+          note.textContent = items.length ? "Dodadeno vo kosnicka." : "Your bag is empty.";
+          return;
+        }
+        var have = items.filter(function (item) { return active.indexOf(item.id) !== -1; }).length;
+        if (have >= 3) {
+          note.textContent = "Kombinacijata e cela. 20% na site 3 artikli.";
+        } else {
+          note.textContent = "Dodadeno vo kosnicka. Nastavete so kupovinate na kombinacijata — 3 artikli i imate 20% na site. (" + have + "/3)";
+        }
+      }
+      function applyCombo(ids) {
+        items.forEach(function (item) {
+          if (ids.indexOf(item.id) === -1) return;
+          item.base = item.base || item.price_mkd;
+          item.price_mkd = Math.round(item.base * 0.8);
+        });
+      }
+      function addItem(item) {
+        if (!item || !item.title) return;
+        var id = item.id || item.title;
+        if (items.some(function (row) { return row.id === id; })) {
+          openBag(true);
+          return;
+        }
+        var price = item.price_mkd || 0;
+        items.push({
+          id: id,
+          title: item.title,
+          price_mkd: price,
+          base: item.old_price_mkd || price,
+          image_url: item.image_url || ""
+        });
+        if (item.combo_percent && item.combo_ids && item.combo_ids.length) applyCombo(item.combo_ids);
+        render();
+        openBag(true);
+      }
+      document.querySelectorAll("article").forEach(function (card) {
+        card.addEventListener("click", function () {
+          addItem({
+            id: card.getAttribute("data-id"),
+            title: card.getAttribute("data-title"),
+            price_mkd: Number(card.getAttribute("data-price")),
+            image_url: card.getAttribute("data-image")
+          });
+        });
+      });
+      window.addEventListener("b2b-ai:cart", function (event) { addItem(event.detail || {}); });
+      bagBtn.addEventListener("click", function () { openBag(true); });
+      document.getElementById("close-bag").addEventListener("click", function () { openBag(false); });
+      scrim.addEventListener("click", function () { openBag(false); });
+      render();
+    </script>
+    <script src="http://127.0.0.1:8000/sdk.js" data-tenant="luna" data-key="pk_luna_demo" data-launcher-label="Ask LUNA" data-launcher-sub="We reply right away" defer></script>
+  </body>
+</html>

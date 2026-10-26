@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="mk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nord Market — test prodavnica</title>
+    <style>
+      :root {
+        --ink: #121212;
+        --muted: #5b6270;
+        --line: #e6e8ee;
+        --bg: #f4f5f7;
+        --card: #fff;
+        --accent: #ff7a00;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        color: var(--ink);
+        background: var(--bg);
+      }
+      .note {
+        margin: 0;
+        padding: 8px 18px;
+        background: #111;
+        color: #ddd;
+        font-size: 12px;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 18px;
+        background: var(--card);
+        border-bottom: 1px solid var(--line);
+      }
+      .burger {
+        width: 42px;
+        height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+        cursor: pointer;
+      }
+      .brand { font-weight: 800; letter-spacing: -0.04em; font-size: 20px; }
+      .search {
+        flex: 1;
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 10px 14px;
+        font: inherit;
+      }
+      .cart { border: 0; background: var(--accent); color: #fff; border-radius: 999px; padding: 10px 14px; font-weight: 700; cursor: pointer; }
+      .drawer {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: min(360px, 92vw);
+        background: #fff;
+        border-right: 1px solid var(--line);
+        transform: translateX(-105%);
+        transition: transform 0.25s ease;
+        z-index: 30;
+        overflow: auto;
+        padding: 18px 16px 80px;
+      }
+      .drawer.is-open { transform: none; }
+      .scrim {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.35);
+        border: 0;
+        display: none;
+        z-index: 25;
+      }
+      .scrim.is-on { display: block; }
+      .drawer h2 { margin: 0 0 12px; font-size: 18px; }
+      details { border-bottom: 1px solid var(--line); padding: 8px 0; }
+      summary { cursor: pointer; font-weight: 700; }
+      .drawer a, .chip-link {
+        display: block;
+        padding: 8px 0 8px 12px;
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .cats {
+        display: flex;
+        gap: 8px;
+        overflow: auto;
+        padding: 12px 18px;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+      }
+      .cats a {
+        flex: none;
+        padding: 8px 12px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        text-decoration: none;
+        color: var(--ink);
+        font-size: 13px;
+      }
+      main { max-width: 1120px; margin: 0 auto; padding: 24px 18px 120px; }
+      h1 { font-size: 28px; letter-spacing: -0.04em; margin: 0 0 8px; }
+      .lead { color: var(--muted); margin: 0 0 24px; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+      article {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      .photo { height: 160px; background: #eceff4 center/cover no-repeat; }
+      article h3 { margin: 12px 12px 4px; font-size: 16px; }
+      .meta { margin: 0 12px; color: var(--muted); font-size: 12px; }
+      .price { margin: 8px 12px 14px; font-weight: 800; }
+      .group { margin: 36px 0 12px; font-size: 20px; }
+      article { cursor: pointer; }
+      article:hover { border-color: #ffb067; box-shadow: 0 8px 24px rgba(0,0,0,.06); }
+      .basket-scrim {
+        position: fixed; inset: 0; border: 0; background: rgba(0,0,0,.35); display: none; z-index: 40;
+      }
+      .basket-scrim.is-on { display: block; }
+      .basket {
+        position: fixed; top: 0; right: 0; bottom: 0; width: min(380px, 94vw); z-index: 45;
+        background: #fff; border-left: 1px solid var(--line); transform: translateX(105%);
+        transition: transform .25s ease; display: flex; flex-direction: column; padding: 18px 16px;
+      }
+      .basket.is-open { transform: none; }
+      .basket h2 { margin: 0 0 12px; font-size: 20px; }
+      .basket ul { list-style: none; margin: 0; padding: 0; flex: 1; overflow: auto; }
+      .basket li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+      .basket .sum { font-weight: 800; margin: 12px 0; }
+      .basket .close-basket { align-self: flex-start; border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 8px 12px; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <p class="note">Test stranica. Ne e Ananas ni Gigatron. Chatot e tenant ananas. Otvori go burger menito, pa prashaj go agentot za telefon do 20 000 denari.</p>
+    <header>
+      <button class="burger" type="button" aria-label="Otvori meni" id="open-menu">☰</button>
+      <div class="brand">Nord Market</div>
+      <input class="search" placeholder="Baraj telefon, ves masina, frizider..." />
+      <button class="cart" id="open-cart" type="button">Kosnicka 0</button>
+    </header>
+    <button class="basket-scrim" id="basket-scrim" type="button" aria-label="Zatvori kosnicka"></button>
+    <aside class="basket" id="basket" aria-label="Kosnicka">
+      <h2>Kosnicka</h2>
+      <ul id="basket-list"></ul>
+      <p class="sum" id="basket-total">0 MKD</p>
+      <button class="close-basket" id="close-cart" type="button">Zatvori</button>
+    </aside>
+    <button class="scrim" id="scrim" type="button" aria-label="Zatvori meni"></button>
+    <nav class="drawer" id="drawer" aria-label="Kategorii">
+      <h2>Kategorii</h2>
+      <details open>
+        <summary>Bela tehnika</summary>
+        <a href="#masini">Masini za perenje</a>
+        <a href="#frizideri">Frizideri</a>
+        <a href="#bela">Sudo masini</a>
+        <a href="#bela">Spojni ploci</a>
+      </details>
+      <details open>
+        <summary>Telefoni i fotografija</summary>
+        <a href="#mobilni">Mobilni telefoni</a>
+        <a href="#mobilni">Futrole i stakla</a>
+        <a href="#mobilni">Kameri</a>
+      </details>
+      <details>
+        <summary>Laptopovi i IT</summary>
+        <a href="#it">Laptopovi</a>
+        <a href="#it">Monitori</a>
+        <a href="#it">Periferii</a>
+      </details>
+      <details>
+        <summary>TV i audio</summary>
+        <a href="#tv">Televizori</a>
+        <a href="#tv">Soundbar</a>
+        <a href="#tv">Slusalki</a>
+      </details>
+      <details>
+        <summary>Mali kucni aparati</summary>
+        <a href="#mali">Usisuvaci</a>
+        <a href="#mali">Kafe aparati</a>
+      </details>
+      <details>
+        <summary>Sport i nega</summary>
+        <a href="#sport">Patiki</a>
+        <a href="#sport">Licna nega</a>
+      </details>
+    </nav>
+    <div class="cats">
+      <a href="#mobilni">Telefoni</a>
+      <a href="#masini">Bela tehnika</a>
+      <a href="#it">Laptopovi</a>
+      <a href="#tv">TV</a>
+      <a href="#mali">Mali aparati</a>
+      <a href="#sport">Sport</a>
+    </div>
+    <main>
+      <h1>Tehnika so istoto meni sto go znae agentot</h1>
+      <p class="lead">Kategorii i ceni se od tenant ananas. Burger menito e namerno gust, kako marketplace. Agentot odgovaara od katalogot, ne od ovie karticki.</p>
+
+      <h2 class="group" id="mobilni">Mobilni telefoni</h2>
+      <div class="grid">
+        <article>
+          <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=640&q=80')"></div>
+          <h3>Xiaomi Redmi 13</h3>
+          <p class="meta">Telefoni / Mobilni · Akcija</p>
+          <p class="price">12.990 MKD <span style="color:#888;font-weight:500;text-decoration:line-through">14.990</span></p>
+        </article>
+        <article>
+          <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=640&q=80')"></div>
+          <h3>Samsung Galaxy A55</h3>
+          <p class="meta">Telefoni / Mobilni</p>
+          <p class="price">24.990 MKD</p>
+        </article>
+        <article>
+          <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=640&q=80')"></div>
+          <h3>iPhone 13 128GB</h3>
+          <p class="meta">Telefoni / Mobilni</p>
+          <p class="price">42.990 MKD</p>
+        </article>
+      </div>
+
+      <h2 class="group" id="masini">Masini za perenje</h2>
+      <div class="grid">
+        <article>
+          <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?auto=format&fit=crop&w=640&q=80')"></div>
+          <h3>Beko 8 kg</h3>
+          <p class="meta">Bela tehnika / Masini</p>
+          <p class="price">27.990 MKD</p>
+        </article>
+        <article>
+          <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?auto=format&fit=crop&w=640&q=80')"></div>
+          <h3>Gorenje 7 kg</h3>
+          <p class="meta">Bela tehnika / Masini · Akcija</p>
+          <p class="price">21.990 MKD <span style="color:#888;font-weight:500;text-decoration:line-through">24.990</span></p>
+        </article>
+      </div>
+
+      <h2 class="group" id="frizideri">Frizideri</h2>
+      <div class="grid">
+        <article>
+          <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?auto=format&fit=crop&w=640&q=80')"></div>
+          <h3>Gorenje NRK 619</h3>
+          <p class="meta">Bela tehnika / Frizideri</p>
+          <p class="price">32.490 MKD</p>
+        </article>
+        <article>
+          <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1536353284924-9220c464e262?auto=format&fit=crop&w=640&q=80')"></div>
+          <h3>Beko RCSA 270</h3>
+          <p class="meta">Bela tehnika / Frizideri · Akcija</p>
+          <p class="price">19.990 MKD <span style="color:#888;font-weight:500;text-decoration:line-through">22.490</span></p>
+        </article>
+      </div>
+
+      <h2 class="group" id="it">Laptopovi i IT</h2>
+      <div class="grid">
+        <article>
+          <div class="photo" style="background-color:#dbe4f0"></div>
+          <h3>Lenovo IdeaPad 3</h3>
+          <p class="meta">IT / Laptopovi</p>
+          <p class="price">36.990 MKD</p>
+        </article>
+        <article>
+          <div class="photo" style="background-color:#d7dde8"></div>
+          <h3>Monitor 27"</h3>
+          <p class="meta">IT / Monitori · Akcija</p>
+          <p class="price">9.990 MKD <span style="color:#888;font-weight:500;text-decoration:line-through">12.490</span></p>
+        </article>
+      </div>
+
+      <h2 class="group" id="tv">TV i audio</h2>
+      <div class="grid">
+        <article>
+          <div class="photo" style="background-color:#cfd6e4"></div>
+          <h3>TV 55" 4K</h3>
+          <p class="meta">TV / Televizori · Akcija</p>
+          <p class="price">24.990 MKD <span style="color:#888;font-weight:500;text-decoration:line-through">29.990</span></p>
+        </article>
+        <article>
+          <div class="photo" style="background-color:#c5ccd8"></div>
+          <h3>Soundbar</h3>
+          <p class="meta">TV / Audio</p>
+          <p class="price">8.990 MKD</p>
+        </article>
+      </div>
+
+      <h2 class="group" id="mali">Mali kucni aparati</h2>
+      <div class="grid">
+        <article>
+          <div class="photo" style="background-color:#e8e0d4"></div>
+          <h3>Xiaomi robot usisuvac</h3>
+          <p class="meta">Mali aparati</p>
+          <p class="price">18.490 MKD</p>
+        </article>
+      </div>
+
+      <h2 class="group" id="sport">Sport i nega</h2>
+      <div class="grid">
+        <article>
+          <div class="photo" style="background-color:#ddd5cc"></div>
+          <h3>Nike Revolution 7</h3>
+          <p class="meta">Sport · Akcija</p>
+          <p class="price">4.490 MKD <span style="color:#888;font-weight:500;text-decoration:line-through">5.990</span></p>
+        </article>
+        <article>
+          <div class="photo" style="background-color:#d8d0c8"></div>
+          <h3>Philips susilo za kosa</h3>
+          <p class="meta">Licna nega</p>
+          <p class="price">4.290 MKD</p>
+        </article>
+      </div>
+    </main>
+    <script>
+      var drawer = document.getElementById("drawer");
+      var scrim = document.getElementById("scrim");
+      function setMenu(open) {
+        drawer.classList.toggle("is-open", open);
+        scrim.classList.toggle("is-on", open);
+      }
+      document.getElementById("open-menu").addEventListener("click", function () { setMenu(true); });
+      scrim.addEventListener("click", function () { setMenu(false); });
+      drawer.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function () { setMenu(false); });
+      });
+
+      var items = [];
+      var basket = document.getElementById("basket");
+      var basketScrim = document.getElementById("basket-scrim");
+      var basketList = document.getElementById("basket-list");
+      var basketTotal = document.getElementById("basket-total");
+      var cartButton = document.getElementById("open-cart");
+
+      function money(amount) {
+        return String(amount).replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " MKD";
+      }
+
+      function parsePrice(text) {
+        var match = String(text || "").match(/(\d{1,3}(?:\.\d{3})+|\d+)/);
+        return match ? parseInt(match[1].replace(/\./g, ""), 10) : 0;
+      }
+
+      function setCart(open) {
+        basket.classList.toggle("is-open", open);
+        basketScrim.classList.toggle("is-on", open);
+        if (open) window.location.hash = "kosnicka";
+      }
+
+      function renderCart() {
+        basketList.textContent = "";
+        var total = 0;
+        items.forEach(function (item) {
+          total += item.price_mkd || 0;
+          var row = document.createElement("li");
+          var name = document.createElement("span");
+          var price = document.createElement("strong");
+          name.textContent = item.title;
+          price.textContent = money(item.price_mkd || 0);
+          row.appendChild(name);
+          row.appendChild(price);
+          basketList.appendChild(row);
+        });
+        basketTotal.textContent = items.length ? money(total) : "Prazna kosnicka";
+        cartButton.textContent = "Kosnicka " + items.length;
+      }
+
+      function addToCart(item) {
+        if (!item || !item.title) return;
+        items.push({
+          id: item.id || item.title,
+          title: item.title,
+          price_mkd: item.price_mkd || 0,
+        });
+        renderCart();
+        setCart(true);
+      }
+
+      cartButton.addEventListener("click", function () { setCart(true); });
+      document.getElementById("close-cart").addEventListener("click", function () { setCart(false); });
+      basketScrim.addEventListener("click", function () { setCart(false); });
+      document.querySelectorAll("main article").forEach(function (card) {
+        card.addEventListener("click", function () {
+          var title = (card.querySelector("h3") || {}).textContent || "";
+          addToCart({ title: title.trim(), price_mkd: parsePrice((card.querySelector(".price") || {}).textContent) });
+        });
+      });
+      window.addEventListener("b2b-ai:cart", function (event) {
+        addToCart(event.detail);
+      });
+      renderCart();
+    </script>
+    <script src="http://127.0.0.1:8000/sdk.js" data-tenant="ananas" data-key="pk_ananas_demo" defer></script>
+  </body>
+</html>

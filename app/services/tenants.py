@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from app.database import get_supabase, supabase_configured
 from app.schemas.tenant import QuickChip, TenantConfig
 from app.services.flow import opening_choices
+from app.services.locale import GREETING_ALL
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +64,7 @@ def _with_menu(config: TenantConfig) -> TenantConfig:
     if not choices:
         return config
     config.quick_chips = [QuickChip(label=choice.label, message=choice.message) for choice in choices]
+    config.greeting_message = GREETING_ALL
     return config
 
 

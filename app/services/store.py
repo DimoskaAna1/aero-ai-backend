@@ -10,6 +10,8 @@ DEMO_KEYS = {
     "ananas": "pk_ananas_demo",
     "health-clinic": "pk_health_demo",
     "demo-tenant": "pk_demo_tenant",
+    "baltic": "pk_baltic_demo",
+    "luna": "pk_luna_demo",
 }
 DEMO_LIMIT = 10000
 STARTER_LIMIT = 500
@@ -136,6 +138,36 @@ def _store_demo_key(tenant_id: str, row_exists: bool) -> str:
 
 def ensure_demo_tenants() -> None:
     """Keep the built-in demos addressable when their row or key is missing."""
+    if tenant_profile("luna") is None:
+        save_tenant(
+            {
+                "id": "luna",
+                "name": "LUNA",
+                "industry": "ecommerce",
+                "agent_name": "Ana | LUNA",
+                "greeting_message": "Zdravo. Izberi jezik.",
+                "quick_chips": [],
+                "system_prompt": "Answer only from the LUNA fashion catalog. Do not invent prices.",
+                "public_key": DEMO_KEYS["luna"],
+                "plan": "demo",
+                "monthly_message_limit": DEMO_LIMIT,
+            }
+        )
+    if tenant_profile("baltic") is None:
+        save_tenant(
+            {
+                "id": "baltic",
+                "name": "Baltic View",
+                "industry": "hotel",
+                "agent_name": "Ana | Stay",
+                "greeting_message": "Zdravo. Izberi jezik.",
+                "quick_chips": [],
+                "system_prompt": "Answer only from this hotel's rooms and extras. Do not invent rates.",
+                "public_key": DEMO_KEYS["baltic"],
+                "plan": "demo",
+                "monthly_message_limit": DEMO_LIMIT,
+            }
+        )
     if tenant_profile("health-clinic") is None:
         save_tenant(
             {
@@ -153,6 +185,12 @@ def ensure_demo_tenants() -> None:
         )
     for tenant_id in DEMO_KEYS:
         public_key_for(tenant_id)
+    try:
+        seeded = seed_tenant_catalog("luna")
+        if seeded:
+            logger.info("Seeded LUNA catalog rows=%s", seeded)
+    except Exception as exc:
+        logger.warning("LUNA catalog seed skipped error_type=%s", type(exc).__name__)
 
 
 def save_tenant(profile: Dict[str, Any]) -> Dict[str, Any]:
@@ -351,34 +389,43 @@ def knowledge_for(tenant_id: str) -> List[Dict[str, Any]]:
     if not key:
         return []
 
-    def read():
-        return (
-            _client()
-            .table("tenant_knowledge")
-            .select("tenant_id,kind,title,body,attributes")
-            .eq("tenant_id", key)
-            .limit(500)
-            .execute()
-        )
-
     rows = []
-    for row in _rows(_run(read)):
-        if str(row.get("tenant_id") or "") != key:
-            continue
-        title = str(row.get("title") or "").strip()
-        body = str(row.get("body") or "").strip()
-        if not title or not body:
-            continue
-        attributes = row.get("attributes") if isinstance(row.get("attributes"), dict) else {}
-        rows.append(
-            {
-                "tenant_id": key,
-                "kind": str(row.get("kind") or "fact"),
-                "title": title,
-                "body": body,
-                "attributes": attributes,
-            }
-        )
+    start = 0
+    while start < 5000:
+
+        def read(start=start):
+            return (
+                _client()
+                .table("tenant_knowledge")
+                .select("tenant_id,kind,title,body,attributes")
+                .eq("tenant_id", key)
+                .range(start, start + 499)
+                .execute()
+            )
+
+        chunk = _rows(_run(read))
+        if not chunk:
+            break
+        for row in chunk:
+            if str(row.get("tenant_id") or "") != key:
+                continue
+            title = str(row.get("title") or "").strip()
+            body = str(row.get("body") or "").strip()
+            if not title or not body:
+                continue
+            attributes = row.get("attributes") if isinstance(row.get("attributes"), dict) else {}
+            rows.append(
+                {
+                    "tenant_id": key,
+                    "kind": str(row.get("kind") or "fact"),
+                    "title": title,
+                    "body": body,
+                    "attributes": attributes,
+                }
+            )
+        if len(chunk) < 500:
+            break
+        start += 500
     return rows
 
 
@@ -402,16 +449,57 @@ def upsert_knowledge(rows: List[Dict[str, Any]]) -> int:
     if not payload:
         return 0
 
-    def write():
+    saved = 0
+    for start in range(0, len(payload), 200):
+        batch = payload[start : start + 200]
+
+        def write(batch=batch):
+            return (
+                _client()
+                .table("tenant_knowledge")
+                .upsert(batch, on_conflict="tenant_id,title")
+                .execute()
+            )
+
+        _run(write)
+        saved += len(batch)
+    return saved
+
+
+def seed_tenant_catalog(tenant_id: str) -> int:
+    """Upsert the in-memory catalog into tenant_knowledge when the table is behind."""
+    from app.services.flow import knowledge_rows
+
+    key = tenant_id.strip()
+    rows = []
+    for row in knowledge_rows(key):
+        rows.append(
+            {
+                "tenant_id": key,
+                "kind": row["kind"],
+                "title": row["title"],
+                "body": row["body"],
+                "attributes": row["attributes"],
+            }
+        )
+    if not rows or _knowledge_count(key) >= len(rows):
+        return 0
+    return upsert_knowledge(rows)
+
+
+def _knowledge_count(tenant_id: str) -> int:
+    def read():
         return (
             _client()
             .table("tenant_knowledge")
-            .upsert(payload, on_conflict="tenant_id,title")
+            .select("id", count="exact")
+            .eq("tenant_id", tenant_id)
+            .limit(1)
             .execute()
         )
 
-    _run(write)
-    return len(payload)
+    response = _run(read)
+    return int(getattr(response, "count", None) or 0)
 
 
 def delete_knowledge_kind(tenant_id: str, kind: str, source: str) -> None:

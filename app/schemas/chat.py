@@ -22,6 +22,18 @@ class Suggestion(BaseModel):
     message: str
 
 
+class CartItem(BaseModel):
+    id: str
+    title: str
+    price_mkd: int = Field(ge=0)
+    image_url: Optional[str] = None
+    old_price_mkd: int = Field(default=0, ge=0)
+    combo_percent: int = Field(default=0, ge=0, le=100)
+    combo_ids: List[str] = Field(default_factory=list)
+    detail: str = ""
+    images: List[str] = Field(default_factory=list)
+
+
 class ChatResponse(BaseModel):
     tenant_id: str
     session_id: str
@@ -31,3 +43,6 @@ class ChatResponse(BaseModel):
     cached: bool
     suggestions: List[Suggestion] = Field(default_factory=list)
     image_url: Optional[str] = None
+    cart: Optional[CartItem] = None
+    card: Optional[CartItem] = None
+    cards: List[CartItem] = Field(default_factory=list)
